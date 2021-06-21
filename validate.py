@@ -22,6 +22,12 @@ from contextlib import suppress
 from timm.models import create_model, apply_test_time_pool, load_checkpoint, is_model, list_models
 from timm.data import create_dataset, create_loader, resolve_data_config, RealLabelsImagenet
 from timm.utils import accuracy, AverageMeter, natural_key, setup_default_logging, set_jit_legacy
+import torchvision.models as models
+import torch.optim as optim
+
+
+
+
 
 has_apex = False
 try:
@@ -37,22 +43,24 @@ try:
 except AttributeError:
     pass
 
+
+
 torch.backends.cudnn.benchmark = True
 _logger = logging.getLogger('validate')
 
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Validation')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('--data', metavar='DIR', default='/media/data/data02/Imagenet2012/',
                     help='path to dataset')
 parser.add_argument('--dataset', '-d', metavar='NAME', default='',
                     help='dataset type (default: ImageFolder/ImageTar if empty)')
 parser.add_argument('--split', metavar='NAME', default='validation',
                     help='dataset split (default: validation)')
-parser.add_argument('--model', '-m', metavar='NAME', default='dpn92',
+parser.add_argument('--model', '-m', metavar='NAME', default='tf_efficientnet_l2_ns',
                     help='model architecture (default: dpn92)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 2)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=16, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--img-size', default=None, type=int,
                     metavar='N', help='Input image dimension, uses model default if empty')
@@ -78,7 +86,7 @@ parser.add_argument('--checkpoint', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
-parser.add_argument('--num-gpu', type=int, default=1,
+parser.add_argument('--num-gpu', type=int, default=2,
                     help='Number of GPUS to use')
 parser.add_argument('--no-test-pool', dest='no_test_pool', action='store_true',
                     help='disable test time pool')
